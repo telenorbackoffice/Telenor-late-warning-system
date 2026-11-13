@@ -91,9 +91,21 @@ function normTime(v) {
   if (m[3]) { const pm = m[3].toLowerCase() === "pm"; if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; }
   return pad(h) + ":" + m[2];
 }
+const clean = v => String(v ?? "").replace(/[\u00a0\u200b]/g, " ").replace(/\s+/g, " ").trim();
 async function readSheet(file) {
   const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
-  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false, defval: "" });
+  const a = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: "" });
+  // The real header row may sit below a title row (e.g. "Employee Login Details as on… (11/09/2026)")
+  let hi = a.findIndex(r => /global|clock|e-?mail/i.test(r.map(clean).join("|")));
+  if (hi < 0) hi = 0;
+  const H = a[hi].map((h, i) => clean(h) || "col" + i);
+  const rows = a.slice(hi + 1).map(r => Object.fromEntries(H.map((h, i) => [h, r[i] ?? ""])));
+  // Date from the title row, read as MM/DD/YYYY
+  for (const r of a.slice(0, hi)) {
+    const m = r.join(" ").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) { rows.titleDate = `${m[3]}-${pad(m[1])}-${pad(m[2])}`; break; }
+  }
+  return rows;
 }
 const col = (row, ...keys) => { const k = Object.keys(row).find(k => keys.some(x => k.toLowerCase().includes(x))); return k ? row[k] : ""; };
 
@@ -140,9 +152,14 @@ async function viewAtt(p) {
   const up = $("#up");
   if (up) up.onchange = async () => {
     try {
-      const out = (await readSheet(up.files[0])).map(r => ({ storeId: col(r, "store"), location: col(r, "location"), name: col(r, "employee", "name"), globalId: col(r, "global"), time: normTime(col(r, "clock")) })).filter(r => r.globalId && r.time);
+      const sheet = await readSheet(up.files[0]);
+      const out = sheet.map(r => ({ storeId: clean(col(r, "store")), location: clean(col(r, "location")), name: clean(col(r, "employee", "name")), globalId: clean(col(r, "global")), time: normTime(col(r, "clock")) })).filter(r => r.globalId && r.time);
       if (!out.length) return toast("No valid rows found. Check the column names.", true);
-      if (!confirm(`Save ${out.length} rows for ${dl(date)}?`)) return;
+      if (sheet.titleDate && sheet.titleDate !== date) {
+        if (!confirm(`The file is dated ${dl(sheet.titleDate)} but ${dl(date)} is selected.\n\nOK = save to ${dl(sheet.titleDate)}\nCancel = stop`)) { up.value = ""; return; }
+        date = sheet.titleDate;
+      }
+      if (!confirm(`Save ${out.length} rows for ${dl(date)}?`)) { up.value = ""; return; }
       const r = await api("upload", { date, rows: out });
       toast(`Saved ${r.saved} employees`); show();
     } catch (e) { toast(e.message, true); }
