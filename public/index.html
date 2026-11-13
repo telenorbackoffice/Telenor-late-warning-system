@@ -177,7 +177,7 @@ async function viewPer(p) {
       : '<p class="mute">No lates in this pay period.</p>');
   bindDate();
   p.querySelectorAll("[data-send]").forEach(b => b.onclick = async () => {
-    if (!confirm(`Email a late warning to ${b.dataset.name}? It will be CC'd as configured.`)) return;
+    if (!confirm(`Email a late warning to ${b.dataset.name}? It will be CC'd to their CC1–CC3 addresses, if any.`)) return;
     b.disabled = true;
     try { const r = await api("send-warning", { date, globalId: b.dataset.send }); toast(`Warning sent to ${r.to}`); show(); } catch (e) { toast(e.message, true); b.disabled = false; }
   });
@@ -189,15 +189,15 @@ async function viewEmp(p) {
   empList = list;
   p.innerHTML = `<div class="row"><button class="btn" id="save">Save emails</button><button class="btn alt" id="add">Add employee</button>
     <label class="btn alt">Import from Excel<input type="file" id="imp" accept=".xlsx,.xls,.csv" class="hide"></label>
-    <span class="mute">Import columns: Global ID, Name, Email. Employees are added automatically when attendance is uploaded.</span></div>
+    <span class="mute">Import columns: Global ID, Name, Email, CC1, CC2, CC3. Employees are added automatically when attendance is uploaded.</span></div>
     <div id="etab"></div>
     <h3 style="margin-top:26px">Warning email wording</h3>
-    <p class="mute">Sent from ${esc(st.from)}, CC ${esc(st.cc)}. Placeholders: {name} {count} {periodStart} {periodEnd} {lateList} {consequence}. {lateList} fills in the date, location and login time of every late so far.</p>
+    <p class="mute">Sent from ${esc(st.from)}, with CC to that employee's CC1–CC3 addresses (set in the table above). A table of the employee's late dates is always included. Placeholders: {name} {count} {periodStart} {periodEnd} {lateList} {consequence}. {lateList} fills in the date, location and login time of every late so far.</p>
     <label>Subject<input id="tsub" value="${esc(st.subject)}"></label>
     <label>Message<textarea id="tbody" rows="10">${esc(st.body)}</textarea></label>
     <div class="row" style="margin-top:12px"><button class="btn" id="tsave">Save wording</button></div>`;
   drawEmp();
-  $("#add").onclick = () => { syncEmp(); empList.unshift({ globalId: "", name: "", email: "" }); drawEmp(); };
+  $("#add").onclick = () => { syncEmp(); empList.unshift({ globalId: "", name: "", email: "", cc1: "", cc2: "", cc3: "" }); drawEmp(); };
   $("#save").onclick = async () => { syncEmp(); try { const r = await api("employees", { list: empList }); toast(`Saved ${r.saved} employees`); } catch (e) { toast(e.message, true); } };
   $("#tsave").onclick = async () => { try { await api("settings", { subject: $("#tsub").value, body: $("#tbody").value }); toast("Wording saved"); } catch (e) { toast(e.message, true); } };
   $("#imp").onchange = async () => {
@@ -205,9 +205,10 @@ async function viewEmp(p) {
       syncEmp();
       const rows = await readSheet($("#imp").files[0]); let n = 0;
       rows.forEach(r => {
-        const g = String(col(r, "global")).trim(), email = String(col(r, "email", "mail")).trim(); if (!g) return;
+        const g = clean(col(r, "global")), email = clean(col(r, "personal", "email")), cc = [1, 2, 3].map(i => clean(col(r, "cc" + i))); if (!g) return;
         const e = empList.find(x => x.globalId === g);
-        if (e) { if (email) e.email = email; if (!e.name) e.name = col(r, "name"); } else empList.push({ globalId: g, name: col(r, "name"), email });
+        if (e) { if (email) e.email = email; cc.forEach((v, i) => { if (v) e["cc" + (i + 1)] = v; }); if (!e.name) e.name = clean(col(r, "name")); }
+        else empList.push({ globalId: g, name: clean(col(r, "name")), email, cc1: cc[0], cc2: cc[1], cc3: cc[2] });
         n++;
       });
       drawEmp(); toast(`Imported ${n} rows. Click Save emails to keep them.`);
@@ -215,8 +216,9 @@ async function viewEmp(p) {
   };
 }
 function drawEmp() {
-  $("#etab").innerHTML = `<table><tr><th>Employee name</th><th>Global ID</th><th>Personal email</th></tr>` + empList.map(e =>
-    `<tr><td><input data-f="name" value="${esc(e.name)}"></td><td><input data-f="globalId" value="${esc(e.globalId)}"></td><td><input data-f="email" type="email" value="${esc(e.email)}" placeholder="name@gmail.com"></td></tr>`).join("") + "</table>";
+  const ci = (e, k) => `<td><input data-f="${k}" type="email" style="min-width:190px" value="${esc(e[k])}" placeholder="optional"></td>`;
+  $("#etab").innerHTML = `<table><tr><th>Employee name</th><th>Global ID</th><th>Personal email</th><th>CC1</th><th>CC2</th><th>CC3</th></tr>` + empList.map(e =>
+    `<tr><td><input data-f="name" style="min-width:170px" value="${esc(e.name)}"></td><td><input data-f="globalId" style="min-width:100px" value="${esc(e.globalId)}"></td><td><input data-f="email" type="email" style="min-width:210px" value="${esc(e.email)}" placeholder="name@gmail.com"></td>${ci(e, "cc1")}${ci(e, "cc2")}${ci(e, "cc3")}</tr>`).join("") + "</table>";
 }
 function syncEmp() { document.querySelectorAll("#etab tr").forEach((tr, i) => { if (!i) return; tr.querySelectorAll("input").forEach(inp => empList[i - 1][inp.dataset.f] = inp.value); }); }
 
