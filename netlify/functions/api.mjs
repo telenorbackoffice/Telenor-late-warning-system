@@ -32,7 +32,7 @@ async function periodLates(p) {
 
 const DEFAULT_TPL = {
   subject: "Late login warning: {periodStart} to {periodEnd}",
-  body: "Hi {name},\n\nYou have {count} late login(s) in the current pay period ({periodStart} to {periodEnd}):\n\n{lateList}\n\n{consequence}\n\nRegards,\nBackoffice"
+  body: "Hi {name},\n\nYou have already been late {count} times in the current pay period ({periodStart} to {periodEnd}). Here are your late login details:\n\n{lateList}\n\n{consequence}\n\nPlease make sure to clock in on time.\n\nRegards,\nBackoffice"
 };
 
 function build(tpl, e, p) {
@@ -47,7 +47,11 @@ function build(tpl, e, p) {
     e.items.map(i => `<tr><td ${td}>${esc(dlabel(i.date))}</td><td ${td}>${esc(i.location)} (Store ${esc(i.storeId)})</td><td ${td}>${t12(i.time)}</td></tr>`).join("") + "</table>";
   const fill = (s, html) => s.replace(/\{(\w+)\}/g, (_, k) => k === "lateList" ? (html ? htmlList : textList) : (html ? esc(v[k]) : String(v[k] ?? "")));
   let bodyTpl = String(tpl.body || DEFAULT_TPL.body);
-  if (!bodyTpl.includes("{lateList}")) bodyTpl += "\n\nLate logins in this pay period:\n\n{lateList}"; // always show the dates
+  if (!bodyTpl.includes("{lateList}")) { // always show the dates: put them just before the sign-off, else at the end
+    const block = "\n\nYour late logins in this pay period:\n\n{lateList}";
+    const so = bodyTpl.match(/\n\s*\n(?=(?:Regards|Thanks|Thank you|Sincerely|Best regards)\b(?:(?!\n\s*\n)[\s\S])*$)/i);
+    bodyTpl = so ? bodyTpl.slice(0, so.index) + block + bodyTpl.slice(so.index) : bodyTpl + block;
+  }
   return { subject: fill(tpl.subject || DEFAULT_TPL.subject, false), text: fill(bodyTpl, false), html: `<div style='font-family:Arial,sans-serif;font-size:14px'>${fill(bodyTpl, true).replace(/\n/g, "<br>")}</div>` };
 }
 
