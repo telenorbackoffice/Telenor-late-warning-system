@@ -1,41 +1,49 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Telenor Late Login Portal</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7f9;--card:#fff;--tx:#1b2330;--mu:#667085;--bd:#dde1e8;--ac:#0b3d91;--late:#d92d20;--lbg:#fee4e2;--ok:#067647;--obg:#d1fadf;--wbg:#fef0c7;--wtx:#93370d}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#12161d;--card:#1a2029;--tx:#e8ebf0;--mu:#98a2b3;--bd:#2d3644;--ac:#7aa7ff;--lbg:#4a1d1a;--obg:#12382a;--wbg:#4a3410;--wtx:#fdb022}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#12161d;--card:#1a2029;--tx:#e8ebf0;--mu:#98a2b3;--bd:#2d3644;--ac:#7aa7ff;--lbg:#4a1d1a;--obg:#12382a;--wbg:#4a3410;--wtx:#fdb022}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+--bg:#f3fbf4;--card:#ffffff;--tx:#1f2937;--mu:#6b7280;--bd:#e3ebe5;--ac:#16a34a;--ac2:#22c55e;
+--green:#22c55e;--yellow:#facc15;--orange:#f97316;--red:#ef4444}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:var(--ac);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-:root:not([data-theme="light"]) header{color:#0b1220}
-header h1{font-size:17px;margin:0}
-main{max-width:1000px;margin:0 auto;padding:14px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
-h2{font-size:15px;margin:0 0 10px}
+header{background:linear-gradient(90deg,#15803d,#22c55e);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(22,163,74,.3)}
+header h1{font-size:19px;margin:0;letter-spacing:.2px}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-top:4px solid var(--ac2);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+h2{font-size:16px;margin:0 0 12px;color:#15803d}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,button{font:inherit;padding:7px 10px;border:1px solid var(--bd);border-radius:7px;background:var(--card);color:var(--tx)}
-button{cursor:pointer;background:var(--ac);color:#fff;border-color:var(--ac)}
-:root:not([data-theme="light"]) button{color:#0b1220}
-button.sec{background:transparent;color:var(--tx);border-color:var(--bd)}
+input,select,button{font:inherit;padding:7px 11px;border:1px solid #cfd8d1;border-radius:8px;background:#fff;color:var(--tx)}
+button{cursor:pointer;background:var(--ac2);color:#fff;border-color:var(--ac);font-weight:600}
+button:hover{background:var(--ac)}
+button:disabled{opacity:.5;cursor:default}
+button.sec{background:#fff;color:#15803d;border-color:#bbe5c8}
 .wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:560px}
-th,td{padding:7px 9px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
-th{font-size:12px;color:var(--mu);text-transform:uppercase}
-.b{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
-.late{background:var(--lbg);color:var(--late)}.ok{background:var(--obg);color:var(--ok)}.warn{background:var(--wbg);color:var(--wtx)}
+th,td{padding:8px 10px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+th{font-size:12px;color:#fff;background:#16a34a;text-transform:uppercase;letter-spacing:.4px}
+th:first-child{border-radius:8px 0 0 0}th:last-child{border-radius:0 8px 0 0}
+tbody tr:hover{background:#f7fdf8}
+tr.rl{background:#fee2e2}tr.ro{background:#ffedd5}tr.ry{background:#fef9c3}
+tr.rl:hover{background:#fecaca}
+.b{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.late{background:var(--red);color:#fff}.ok{background:var(--green);color:#fff}.warn{background:var(--orange);color:#fff}.one{background:var(--yellow);color:#713f12}
 .mu{color:var(--mu);font-size:12px}
 td.clk.adm{cursor:pointer;text-decoration:underline dotted}
 .hide{display:none}
-#msg{padding:8px 12px;border-radius:8px;background:var(--wbg);color:var(--wtx);margin-bottom:12px}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+#msg{padding:9px 13px;border-radius:8px;background:#fef9c3;color:#713f12;border:1px solid #facc15;margin-bottom:12px}
 </style></head><body>
 <header><h1>Telenor Late Login Portal</h1>
 <div class="row"><span id="who" class="mu" style="color:inherit">Viewing (public)</span>
 <button class="sec" id="loginBtn" style="color:inherit;border-color:currentColor">Backoffice login</button></div></header>
 <main>
 <div id="msg" class="hide"></div>
+<div class="legend"><span class="b ok">On time / 0 lates</span><span class="b one">1 late</span><span class="b warn">2 lates: warning</span><span class="b late">Late / 3+ lates: lose half commission</span></div>
+
 
 <div class="card hide" id="loginCard"><h2>Backoffice login</h2>
 <div class="row"><input id="u" placeholder="Username" autocomplete="username"><input id="p" type="password" placeholder="Password" autocomplete="current-password"><button id="doLogin">Log in</button><button class="sec" id="cancelLogin">Cancel</button></div>
@@ -151,7 +159,7 @@ function render(){
   $('admHint').textContent=admin?'Click a clock-in time to cycle: automatic → marked late → marked on time.':'';
   $('dayBody').innerHTML=rows.filter(r=>r.date===cur).sort((a,b)=>a.store.localeCompare(b.store,undefined,{numeric:true})).map(r=>{
     const l=isLate(r),o=r.ov?` <span class="mu">(manual)</span>`:'';
-    return `<tr><td>${esc(r.store)}</td><td>${esc(r.loc)}</td><td>${esc(r.name)}</td><td>${esc(r.gid)}</td><td class="clk ${admin?'adm':''}" data-id="${esc(r.id)}">${fmtT(r.min)}</td><td><span class="b ${l?'late':'ok'}">${l?'Late':'On time'}</span>${o}</td></tr>`}).join('')||'<tr><td colspan="6" class="mu">No attendance uploaded.</td></tr>';
+    return `<tr class="${l?'rl':''}"><td>${esc(r.store)}</td><td>${esc(r.loc)}</td><td>${esc(r.name)}</td><td>${esc(r.gid)}</td><td class="clk ${admin?'adm':''}" data-id="${esc(r.id)}">${fmtT(r.min)}</td><td><span class="b ${l?'late':'ok'}">${l?'Late':'On time'}</span>${o}</td></tr>`}).join('')||'<tr><td colspan="6" class="mu">No attendance uploaded.</td></tr>';
   // periods
   const periods=[...new Set(rows.map(r=>pStart(r.date)))].sort((a,b)=>b-a);
   const pc=periods.includes(+$('perSel').value)?+$('perSel').value:periods[0];
@@ -161,14 +169,14 @@ function render(){
   const list=Object.values(emp).sort((a,b)=>b.days.size-a.days.size||a.name.localeCompare(b.name));
   $('sumBody').innerHTML=list.map(e=>{
     const n=e.days.size,key=e.gid+'_'+pc;
-    const st=n>=3?'<span class="b late">Lost half commission</span>':n===2?'<span class="b warn">Warning due</span>':n===1?'<span class="b ok">1 late</span>':'<span class="b ok">Clean</span>';
+    const st=n>=3?'<span class="b late">Lost half commission</span>':n===2?'<span class="b warn">Warning due</span>':n===1?'<span class="b one">1 late</span>':'<span class="b ok">Clean</span>';
     const dl=[...e.days].sort().map(d=>fmtD(d).replace(/, \d{4}$/,'')).join('; ')||'—';
     let a='';
     if(admin){
       const em=emails[e.gid]?.email||'';
       const act=n===2?(sent[key]?`<span class="mu">Sent ${esc(sent[key].on)}</span> <button class="sec" data-w="${esc(e.gid)}" data-p="${pc}">Resend</button>`:`<button data-w="${esc(e.gid)}" data-p="${pc}">Send warning</button>`):'';
       a=`<td><input data-em="${esc(e.gid)}" value="${esc(em)}" placeholder="name@email.com" size="22"></td><td>${act}</td>`}
-    return `<tr><td>${esc(e.name)}</td><td>${esc(e.gid)}</td><td class="mu">${esc(dl)}</td><td><b>${n}</b></td><td>${st}</td>${a}</tr>`}).join('')||'<tr><td colspan="7" class="mu">No data.</td></tr>';
+    return `<tr class="${n>=3?'rl':n===2?'ro':n===1?'ry':''}"><td>${esc(e.name)}</td><td>${esc(e.gid)}</td><td class="mu">${esc(dl)}</td><td><b>${n}</b></td><td>${st}</td>${a}</tr>`}).join('')||'<tr><td colspan="7" class="mu">No data.</td></tr>';
 }
 $('dateSel').onchange=render;$('perSel').onchange=render;
 document.addEventListener('click',async e=>{
