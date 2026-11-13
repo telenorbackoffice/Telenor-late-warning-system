@@ -55,7 +55,10 @@ export default async (req) => {
   try {
     const body = req.method === "POST" ? await req.json() : {};
     switch (path) {
-      case "login": need(); return J({ ok: true });
+      case "login":
+        if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS) return J({ error: "ADMIN_USER / ADMIN_PASS are not set on the server. Add them in Netlify and redeploy." }, 500);
+        if (!admin) return J({ error: "Username or password does not match ADMIN_USER / ADMIN_PASS in Netlify" }, 401);
+        return J({ ok: true });
 
       case "dates": {
         const { blobs } = await db().list({ prefix: "att/" });
