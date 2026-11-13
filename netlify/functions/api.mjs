@@ -15,6 +15,8 @@ const dlabel = d => new Date(ts(d)).toLocaleDateString("en-US", { weekday: "shor
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const getJ = async (k, def) => (await db().get(k, { type: "json" })) ?? def;
 const setJ = (k, v) => db().setJSON(k, v);
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const ccOf = v => [v?.cc1, v?.cc2, v?.cc3].map(x => String(x || "").trim()).filter(Boolean);
 const authed = req => !!process.env.ADMIN_PASS && req.headers.get("x-user") === process.env.ADMIN_USER && req.headers.get("x-pass") === process.env.ADMIN_PASS;
 
 async function periodLates(p) {
@@ -44,7 +46,9 @@ function build(tpl, e, p) {
   const htmlList = `<table style='border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px'><tr><th ${th}>Date</th><th ${th}>Location</th><th ${th}>Login time</th></tr>` +
     e.items.map(i => `<tr><td ${td}>${esc(dlabel(i.date))}</td><td ${td}>${esc(i.location)} (Store ${esc(i.storeId)})</td><td ${td}>${t12(i.time)}</td></tr>`).join("") + "</table>";
   const fill = (s, html) => s.replace(/\{(\w+)\}/g, (_, k) => k === "lateList" ? (html ? htmlList : textList) : (html ? esc(v[k]) : String(v[k] ?? "")));
-  return { subject: fill(tpl.subject, false), text: fill(tpl.body, false), html: `<div style='font-family:Arial,sans-serif;font-size:14px'>${fill(tpl.body, true).replace(/\n/g, "<br>")}</div>` };
+  let bodyTpl = String(tpl.body || DEFAULT_TPL.body);
+  if (!bodyTpl.includes("{lateList}")) bodyTpl += "\n\nLate logins in this pay period:\n\n{lateList}"; // always show the dates
+  return { subject: fill(tpl.subject || DEFAULT_TPL.subject, false), text: fill(bodyTpl, false), html: `<div style='font-family:Arial,sans-serif;font-size:14px'>${fill(bodyTpl, true).replace(/\n/g, "<br>")}</div>` };
 }
 
 export default async (req) => {
@@ -93,7 +97,7 @@ export default async (req) => {
         const list = Object.values(best);
         await setJ("att/" + date, list);
         const emails = await getJ("emails", {});
-        list.forEach(r => { emails[r.globalId] = { name: r.name || emails[r.globalId]?.name || "", email: emails[r.globalId]?.email || "" }; });
+        list.forEach(r => { emails[r.globalId] = { ...emails[r.globalId], name: r.name || emails[r.globalId]?.name || "", email: emails[r.globalId]?.email || "" }; });
         await setJ("emails", emails);
         return J({ saved: list.length });
       }
@@ -114,9 +118,12 @@ export default async (req) => {
           const out = {};
           (body.list || []).forEach(e => {
             const g = String(e.globalId || "").trim(); if (!g) return;
-            const email = String(e.email || "").trim();
-            if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw Object.assign(new Error("Invalid email for " + (e.name || g)), { status: 400 });
-            out[g] = { name: String(e.name || "").trim(), email };
+            const rec = { name: String(e.name || "").trim(), email: String(e.email || "").trim() };
+            ["cc1", "cc2", "cc3"].forEach(k => rec[k] = String(e[k] || "").trim());
+            [["email", "email"], ["cc1", "CC1"], ["cc2", "CC2"], ["cc3", "CC3"]].forEach(([k, label]) => {
+              if (rec[k] && !EMAIL_RE.test(rec[k])) throw Object.assign(new Error(`Invalid ${label} for ${e.name || g}`), { status: 400 });
+            });
+            out[g] = rec;
           });
           await setJ("emails", out);
           return J({ saved: Object.keys(out).length });
@@ -127,7 +134,7 @@ export default async (req) => {
       case "settings": {
         need();
         if (req.method === "POST") { await setJ("settings", { subject: body.subject, body: body.body }); return J({ ok: true }); }
-        return J({ ...(await getJ("settings", DEFAULT_TPL)), cc: process.env.CC_LIST || "jayp@paktelusa.com", from: process.env.GMAIL_USER || "(GMAIL_USER not set)" });
+        return J({ ...(await getJ("settings", DEFAULT_TPL)), from: process.env.GMAIL_USER || "(GMAIL_USER not set)" });
       }
 
       case "send-warning": {
@@ -140,12 +147,13 @@ export default async (req) => {
         if (!to) return J({ error: "No email on file for " + e.name }, 400);
         if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) return J({ error: "GMAIL_USER / GMAIL_APP_PASSWORD not set in Netlify" }, 500);
         const m = build(await getJ("settings", DEFAULT_TPL), e, p);
+        const cc = [...new Set(ccOf(emails[body.globalId]).map(x => x.toLowerCase()))].filter(x => x !== to.toLowerCase());
         const tx = nodemailer.createTransport({ service: "gmail", auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD } });
-        await tx.sendMail({ from: `Telenor Backoffice <${process.env.GMAIL_USER}>`, to, cc: process.env.CC_LIST || "jayp@paktelusa.com", ...m });
+        await tx.sendMail({ from: `Telenor Backoffice <${process.env.GMAIL_USER}>`, to, ...(cc.length ? { cc } : {}), ...m });
         const warned = await getJ("warnings", {});
-        warned[p.start + "|" + e.globalId] = { at: new Date().toISOString(), count: e.items.length, to };
+        warned[p.start + "|" + e.globalId] = { at: new Date().toISOString(), count: e.items.length, to, cc };
         await setJ("warnings", warned);
-        return J({ sent: true, to, count: e.items.length });
+        return J({ sent: true, to, cc, count: e.items.length });
       }
     }
     return J({ error: "Not found" }, 404);
