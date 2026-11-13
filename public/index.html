@@ -1,202 +1,209 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="color-scheme" content="light">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Telenor Late Login Portal</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Login Portal</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
---bg:#f3fbf4;--card:#ffffff;--tx:#1f2937;--mu:#6b7280;--bd:#e3ebe5;--ac:#16a34a;--ac2:#22c55e;
---green:#22c55e;--yellow:#facc15;--orange:#f97316;--red:#ef4444}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:linear-gradient(90deg,#15803d,#22c55e);color:#fff;padding:16px clamp(16px,3vw,48px);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(22,163,74,.3)}
-header h1{font-size:22px;margin:0;letter-spacing:.2px}
-main{width:100%;max-width:none;margin:0 auto;padding:22px clamp(16px,3vw,48px)}
-.card{background:var(--card);border:1px solid var(--bd);border-top:4px solid var(--ac2);border-radius:12px;padding:22px 26px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-h2{font-size:18px;margin:0 0 14px;color:#15803d}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,button{font:inherit;padding:9px 14px;border:1px solid #cfd8d1;border-radius:8px;background:#fff;color:var(--tx)}
-button{cursor:pointer;background:var(--ac2);color:#000;border-color:var(--ac);font-weight:600}
-button:hover{background:var(--ac)}
-button:disabled{opacity:.5;cursor:default}
-button.sec{background:#fff;color:#15803d;border-color:#bbe5c8}
-.wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:760px;table-layout:auto}
-th,td{padding:12px 18px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
-th{font-size:13px;color:#fff;background:#16a34a;text-transform:uppercase;letter-spacing:.4px}
-th:first-child{border-radius:8px 0 0 0}th:last-child{border-radius:0 8px 0 0}
-tbody tr:hover{background:#f7fdf8}
-tr.rl{background:#fee2e2}tr.ro{background:#ffedd5}tr.ry{background:#fef9c3}
-tr.rl:hover{background:#fecaca}
-.b{display:inline-block;padding:3px 12px;border-radius:99px;font-size:13px;font-weight:700}
-.late{background:var(--red);color:#fff}.ok{background:var(--green);color:#fff}.warn{background:var(--orange);color:#fff}.one{background:var(--yellow);color:#713f12}
-.mu{color:var(--mu);font-size:12px}
-td.clk.adm{cursor:pointer;text-decoration:underline dotted}
-.hide{display:none}
-.legend{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-#msg{padding:9px 13px;border-radius:8px;background:#fef9c3;color:#713f12;border:1px solid #facc15;margin-bottom:12px}
-</style></head><body>
-<header><h1>Telenor Late Login Portal</h1>
-<div class="row"><span id="who" class="mu" style="color:inherit">Viewing (public)</span>
-<button id="loginBtn" style="background:#fff;color:#000;border-color:#fff">Backoffice login</button></div></header>
+:root{--ink:#1c2630;--mute:#5d6b78;--line:#d9dfe5;--bg:#eef1f4;--panel:#fff;--accent:#1f4e8c;--late:#b3261e;--warn:#a85f00;--ok:#1b6e43}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:600;flex:1}
+main{max-width:1080px;margin:0 auto;padding:18px}
+nav{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+nav button{border:0;background:#dfe5ea;padding:9px 16px;border-radius:6px 6px 0 0;font:inherit;cursor:pointer;color:var(--mute)}
+nav button.on{background:var(--panel);color:var(--ink);font-weight:600}
+.panel{background:var(--panel);border-radius:0 8px 8px 8px;padding:18px;overflow-x:auto}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+button,input,textarea{font:inherit}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+input,textarea{border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
+input[type=date]{width:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mute);font-size:13px}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:13px;font-weight:600}
+.tag.late{background:#fbe4e2;color:var(--late)}.tag.ok{background:#dff1e7;color:var(--ok)}.tag.warn{background:#fdecd2;color:var(--warn)}
+.mute{color:var(--mute);font-size:13px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;display:none;max-width:90vw}
+#toast.err{background:var(--late)}
+dialog{border:0;border-radius:10px;padding:22px;width:min(360px,92vw)}
+dialog label{display:block;margin:10px 0 4px;font-size:13px;color:var(--mute)}
+details summary{cursor:pointer;color:var(--accent)}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>Late Login Portal</h1>
+  <span id="who" class="mute" style="color:#c5d0da"></span>
+  <button class="btn alt" id="loginBtn">Backoffice login</button>
+</header>
 <main>
-<div id="msg" class="hide"></div>
-<div class="legend"><span class="b ok">On time / 0 lates</span><span class="b one">1 late</span><span class="b warn">2 lates: warning</span><span class="b late">Late / 3+ lates: lose half commission</span></div>
-
-
-<div class="card hide" id="loginCard"><h2>Backoffice login</h2>
-<div class="row"><input id="u" placeholder="Username" autocomplete="username"><input id="p" type="password" placeholder="Password" autocomplete="current-password"><button id="doLogin">Log in</button><button class="sec" id="cancelLogin">Cancel</button></div>
-<div class="mu" id="lerr"></div></div>
-
-<div class="card hide" id="upCard"><h2>Upload daily attendance</h2>
-<div class="row"><input type="file" id="file" accept=".xlsx,.xls,.csv">
-<label>Attendance date <input type="date" id="upDate"></label>
-<button id="saveUp" disabled>Save attendance</button></div>
-<div class="mu" id="upInfo">Columns expected: Store ID, Location, Employee Name, Global ID, Clock In Time. The date is read from the title row (MM/DD/YYYY); change it above if needed.</div></div>
-
-<div class="card"><h2>Daily attendance</h2>
-<div class="row"><label>Date <select id="dateSel"></select></label>
-<span class="mu" id="rule"></span></div>
-<div class="wrap"><table><thead><tr><th>Store</th><th>Location</th><th>Employee</th><th>Global ID</th><th>Clock in</th><th>Status</th></tr></thead><tbody id="dayBody"></tbody></table></div>
-<div class="mu" id="admHint"></div>
-<div id="gaps" style="margin-top:10px"></div></div>
-
-<div class="card"><h2>Pay period late summary</h2>
-<div class="row"><label>Pay period <select id="perSel"></select></label>
-<span class="mu">2 lates = warning email · 3+ lates = half of the month’s commission lost</span></div>
-<div class="wrap"><table><thead><tr><th>Employee</th><th>Global ID</th><th>Late dates</th><th>Lates</th><th>Status</th><th class="adm">Personal email</th><th class="adm">Action</th></tr></thead><tbody id="sumBody"></tbody></table></div></div>
+  <nav>
+    <button data-tab="att" class="on">Daily attendance</button>
+    <button data-tab="per">Pay period lates</button>
+    <button data-tab="emp" class="admin hide">Employee emails</button>
+  </nav>
+  <div class="panel" id="panel"></div>
 </main>
+<div id="toast"></div>
+<dialog id="dlg">
+  <form method="dialog" id="loginForm">
+    <strong>Backoffice login</strong>
+    <label>Username</label><input id="lu" autocomplete="username">
+    <label>Password</label><input id="lp" type="password" autocomplete="current-password">
+    <div class="row" style="margin:16px 0 0"><button class="btn" value="ok">Log in</button><button class="btn alt" value="cancel" formnovalidate>Cancel</button></div>
+  </form>
+</dialog>
+
 <script>
-const ANCHOR=Date.UTC(2026,10,9), DAY=864e5;
-let att={},emails={},sent={},admin=false,db=null,upRows=null;
-const $=i=>document.getElementById(i);
-const pad=n=>String(n).padStart(2,'0');
-const ds=t=>{const d=new Date(t);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())};
-const tms=s=>{const[y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)};
-const fmtD=s=>{const d=new Date(tms(s));return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})};
-const pStart=s=>ANCHOR+Math.floor((tms(s)-ANCHOR)/(14*DAY))*14*DAY;
-const pLabel=t=>fmtD(ds(t))+' → '+fmtD(ds(t+13*DAY));
-const dow=s=>new Date(tms(s)).getUTCDay();
-const thr=s=>dow(s)===0?10*60+43:9*60+43;
-const fmtT=m=>{const h=Math.floor(m/60),mm=m%60;return ((h+11)%12+1)+':'+pad(mm)+' '+(h<12?'AM':'PM')};
-const auto=r=>r.min>=thr(r.date);
-const isLate=r=>r.ov==='late'?true:r.ov==='ontime'?false:auto(r);
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function note(t){const m=$('msg');m.textContent=t;m.classList.toggle('hide',!t)}
-let cred=null;
-async function api(body,c){
-  const r=await fetch('/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...(c||cred||{}),...body})});
-  if(r.status===401)throw new Error('auth');
-  if(!r.ok)throw new Error('server '+r.status);
-  return r.json()}
-async function put(col,id,data){return putBulk(col,{[id]:data})}
-async function putBulk(col,items){
-  try{await api({op:'set',col,items});return true}
-  catch(e){note('Could not save: '+(e.message==='auth'?'login expired, please log in again.':e.message));return false}}
-async function loadAll(){
-  try{const r=await fetch('/api');if(!r.ok)throw 0;const d=await r.json();
-    for(const [t,k] of [[att,'attendance'],[emails,'emails'],[sent,'warnings']]){for(const x in t)delete t[x];Object.assign(t,d[k]||{})}
-    note('');render()}
-  catch(e){note('Could not reach the server. Check your connection and refresh the page.')}}
-// ---- storage
-loadAll();setInterval(()=>{if(!(document.activeElement&&document.activeElement.tagName==='INPUT'))loadAll()},60000);
-// ---- login
-$('loginBtn').onclick=()=>{if(admin){admin=false;cred=null;render()}else $('loginCard').classList.remove('hide')};
-$('cancelLogin').onclick=()=>$('loginCard').classList.add('hide');
-$('doLogin').onclick=async()=>{
-  const u=$('u').value,p=$('p').value;
-  try{await api({op:'login'},{u,p});cred={u,p};admin=true;$('loginCard').classList.add('hide');$('u').value=$('p').value='';$('lerr').textContent='';render()}
-  catch(e){$('lerr').textContent=e.message==='auth'?'Incorrect username or password.':'Could not reach the server.'}};
-// ---- upload
-const parseT=v=>{
-  if(typeof v==='number')return Math.round((v%1)*1440);
-  const m=String(v??'').match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);if(!m)return null;
-  let h=+m[1];const ap=(m[3]||'').toUpperCase();if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;return h*60+ +m[2]};
-$('file').onchange=async e=>{
-  const f=e.target.files[0];if(!f)return;upRows=null;$('saveUp').disabled=true;
-  try{
-    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
-    const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
-    let hi=a.findIndex(r=>r.some(c=>/clock/i.test(c)));
-    if(hi<0)throw new Error('Could not find a “Clock In Time” header row.');
-    const H=a[hi].map(c=>String(c).toLowerCase());
-    const ix=k=>H.findIndex(h=>h.includes(k));
-    const c={store:ix('store'),loc:ix('location'),name:ix('name'),gid:ix('global'),t:ix('clock')};
-    let dt='';
-    for(const r of a.slice(0,hi)){const m=r.join(' ').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m){dt=m[3]+'-'+pad(m[1])+'-'+pad(m[2]);break}}
-    upRows=a.slice(hi+1).map(r=>({store:String(r[c.store]).trim(),loc:String(r[c.loc]).trim(),name:String(r[c.name]).trim(),gid:String(r[c.gid]).trim().toLowerCase(),min:parseT(r[c.t])})).filter(r=>r.gid&&r.min!==null);
-    if(dt)$('upDate').value=dt;
-    $('upInfo').textContent=upRows.length+' employee logins found'+(dt?'':' — date not found in title, please pick it')+'. Check the date, then save.';
-    $('saveUp').disabled=!upRows.length;
-  }catch(err){$('upInfo').textContent='Upload failed: '+err.message}};
-$('saveUp').onclick=async()=>{
-  const d=$('upDate').value;if(!d||!upRows)return;$('saveUp').disabled=true;
-  const items={};
-  for(const r of upRows){const id=d+'_'+r.gid+'_'+r.store;const ov=att[id]?.ov||null;items[id]={...r,date:d,ov}}
-  if(!await putBulk('attendance',items)){$('saveUp').disabled=false;return}
-  Object.assign(att,items);
-  $('upInfo').textContent='Saved '+upRows.length+' logins for '+fmtD(d)+'.';upRows=null;$('file').value='';
-  $('dateSel').value=d;render()};
-function updInfo(){const d=$('upDate').value;if(!d||upRows)return;const n=Object.values(att).filter(r=>r.date===d).length;
-  $('upInfo').textContent=n?fmtD(d)+' already has '+n+' logins; uploading a file for this date will update them.':'No data yet for '+fmtD(d)+'. Choose the file for this date.'}
-$('upDate').onchange=()=>{upRows?$('upInfo').textContent=upRows.length+' logins ready for '+fmtD($('upDate').value)+'. Click Save.':updInfo()};
-// ---- render
-function render(){
-  $('who').textContent=admin?'Backoffice (logged in)':'Viewing (public)';
-  $('loginBtn').textContent=admin?'Log out':'Backoffice login';
-  $('upCard').classList.toggle('hide',!admin);
-  document.querySelectorAll('th.adm').forEach(e=>e.style.display=admin?'':'none');
-  const rows=Object.entries(att).map(([id,r])=>({id,...r}));
-  const dates=[...new Set(rows.map(r=>r.date))].sort().reverse();
-  const cur=$('dateSel').value&&dates.includes($('dateSel').value)?$('dateSel').value:dates[0];
-  $('dateSel').innerHTML=dates.map(d=>`<option value="${d}" ${d===cur?'selected':''}>${fmtD(d)}</option>`).join('')||'<option>No data yet</option>';
-  if(cur){$('rule').textContent='Late if clock-in is '+fmtT(thr(cur))+' or later'}
-  {const have=new Set(dates),miss=[];
-   if(dates.length){const n=new Date(),y=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-DAY;
-    for(let t=tms(dates[dates.length-1]);t<=y;t+=DAY)if(!have.has(ds(t)))miss.push(ds(t))}
-   $('gaps').innerHTML=miss.length?'<span class="mu">Days with no attendance uploaded: </span>'+miss.slice(-20).map(d=>admin?`<button class="sec" data-gap="${d}">${fmtD(d).replace(/, \d{4}$/,'')}</button>`:`<span class="b warn">${fmtD(d).replace(/, \d{4}$/,'')}</span>`).join(' ')+(admin?' <span class="mu">(click a day to upload it)</span>':''):''}
-  $('admHint').textContent=admin?'Click a clock-in time to cycle: automatic → marked late → marked on time.':'';
-  $('dayBody').innerHTML=rows.filter(r=>r.date===cur).sort((a,b)=>a.store.localeCompare(b.store,undefined,{numeric:true})).map(r=>{
-    const l=isLate(r),o=r.ov?` <span class="mu">(manual)</span>`:'';
-    return `<tr class="${l?'rl':''}"><td>${esc(r.store)}</td><td>${esc(r.loc)}</td><td>${esc(r.name)}</td><td>${esc(r.gid)}</td><td class="clk ${admin?'adm':''}" data-id="${esc(r.id)}">${fmtT(r.min)}</td><td><span class="b ${l?'late':'ok'}">${l?'Late':'On time'}</span>${o}</td></tr>`}).join('')||'<tr><td colspan="6" class="mu">No attendance uploaded.</td></tr>';
-  // periods
-  const periods=[...new Set(rows.map(r=>pStart(r.date)))].sort((a,b)=>b-a);
-  const pc=periods.includes(+$('perSel').value)?+$('perSel').value:periods[0];
-  $('perSel').innerHTML=periods.map(p=>`<option value="${p}" ${p===pc?'selected':''}>${pLabel(p)}</option>`).join('')||'<option>No data yet</option>';
-  const emp={};
-  rows.filter(r=>pStart(r.date)===pc).forEach(r=>{const e=emp[r.gid]??={name:r.name,gid:r.gid,days:new Set()};if(isLate(r))e.days.add(r.date)});
-  const list=Object.values(emp).sort((a,b)=>b.days.size-a.days.size||a.name.localeCompare(b.name));
-  $('sumBody').innerHTML=list.map(e=>{
-    const n=e.days.size,key=e.gid+'_'+pc;
-    const st=n>=3?'<span class="b late">Lost half commission</span>':n===2?'<span class="b warn">Warning due</span>':n===1?'<span class="b one">1 late</span>':'<span class="b ok">Clean</span>';
-    const dl=[...e.days].sort().map(d=>fmtD(d).replace(/, \d{4}$/,'')).join('; ')||'—';
-    let a='';
-    if(admin){
-      const em=emails[e.gid]?.email||'';
-      const act=n===2?(sent[key]?`<span class="mu">Sent ${esc(sent[key].on)}</span> <button class="sec" data-w="${esc(e.gid)}" data-p="${pc}">Resend</button>`:`<button data-w="${esc(e.gid)}" data-p="${pc}">Send warning</button>`):'';
-      a=`<td><input data-em="${esc(e.gid)}" value="${esc(em)}" placeholder="name@email.com" size="22"></td><td>${act}</td>`}
-    return `<tr class="${n>=3?'rl':n===2?'ro':n===1?'ry':''}"><td>${esc(e.name)}</td><td>${esc(e.gid)}</td><td class="mu">${esc(dl)}</td><td><b>${n}</b></td><td>${st}</td>${a}</tr>`}).join('')||'<tr><td colspan="7" class="mu">No data.</td></tr>';
+const $ = s => document.querySelector(s), pad = n => String(n).padStart(2, "0");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const now = new Date();
+let date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`, tab = "att";
+let auth = null;
+try { auth = JSON.parse(sessionStorage.getItem("auth") || "null"); } catch (e) {}
+let empList = [];
+
+function toast(m, err) { const t = $("#toast"); t.textContent = m; t.className = err ? "err" : ""; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 4500); }
+async function api(path, body) {
+  const h = { "content-type": "application/json" };
+  if (auth) { h["x-user"] = auth.u; h["x-pass"] = auth.p; }
+  const r = await fetch("/api/" + path, { method: body ? "POST" : "GET", headers: h, body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || r.statusText);
+  return d;
 }
-$('dateSel').onchange=render;$('perSel').onchange=render;
-document.addEventListener('click',async e=>{
-  const td=e.target.closest('td.clk.adm');
-  if(td&&admin){const r=att[td.dataset.id];if(!r)return;
-    r.ov=!r.ov?'late':r.ov==='late'?'ontime':null;
-    render();await put('attendance',td.dataset.id,r);return}
-  const gp=e.target.closest('[data-gap]');
-  if(gp&&admin){$('upDate').value=gp.dataset.gap;$('upCard').scrollIntoView();updInfo();return}
-  const w=e.target.closest('[data-w]');
-  if(w&&admin){
-    const gid=w.dataset.w,p=+w.dataset.p,em=emails[gid]?.email;
-    if(!em||!/^\S+@\S+\.\S+$/.test(em)){note('Enter a valid personal email for '+gid+' first (type it, then click outside the box).');return}
-    const name=(Object.values(att).find(r=>r.gid===gid)||{}).name||'Employee';
-    const sub='Late login warning – one more late will cost half your commission';
-    const body=`Hi ${name},\n\nOur records show you have already been late 2 times in the current pay period (${pLabel(p)}).\n\nUnder the Telenor late login policy, if you are late one more time in this pay period, you will lose half of your commission pay for the month.\n\nPlease make sure to clock in on time.\n\nThank you,\nTelenor Backoffice`;
-    const k=gid+'_'+p,rec={on:new Date().toLocaleDateString('en-US')};sent[k]=rec;await put('warnings',k,rec);
-    location.href='mailto:'+encodeURIComponent(em)+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);render()}});
-document.addEventListener('change',async e=>{
-  const g=e.target.dataset?.em;if(!g||!admin)return;
-  const v=e.target.value.trim();emails[g]={email:v};await put('emails',g,{email:v});render()});
-render();
-</script></body></html>
+const t12 = t => { let [h, m] = t.split(":").map(Number); const p = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return `${h}:${pad(m)} ${p}`; };
+const dl = d => new Date(d + "T00:00:00Z").toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+function normTime(v) {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") { const m = Math.round((v % 1) * 1440); return pad(Math.floor(m / 60) % 24) + ":" + pad(m % 60); }
+  const m = String(v).trim().match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?/);
+  if (!m) return null;
+  let h = +m[1];
+  if (m[3]) { const pm = m[3].toLowerCase() === "pm"; if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; }
+  return pad(h) + ":" + m[2];
+}
+async function readSheet(file) {
+  const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false, defval: "" });
+}
+const col = (row, ...keys) => { const k = Object.keys(row).find(k => keys.some(x => k.toLowerCase().includes(x))); return k ? row[k] : ""; };
+
+function setAuthUI() {
+  document.querySelectorAll(".admin").forEach(e => e.classList.toggle("hide", !auth));
+  $("#who").textContent = auth ? "Backoffice: " + auth.u : "";
+  $("#loginBtn").textContent = auth ? "Log out" : "Backoffice login";
+}
+$("#loginBtn").onclick = () => {
+  if (auth) { auth = null; sessionStorage.removeItem("auth"); if (tab === "emp") tab = "att"; setAuthUI(); show(); return; }
+  $("#dlg").showModal();
+};
+$("#loginForm").onsubmit = async e => {
+  if (e.submitter?.value !== "ok") return;
+  const a = { u: $("#lu").value.trim(), p: $("#lp").value };
+  try { auth = a; await api("login", {}); sessionStorage.setItem("auth", JSON.stringify(a)); setAuthUI(); show(); toast("Logged in"); }
+  catch (er) { auth = null; toast("Login failed: " + er.message, true); }
+  $("#lp").value = "";
+};
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.tab; show(); });
+
+async function show() {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  const p = $("#panel");
+  p.innerHTML = '<span class="mute">Loading…</span>';
+  try { await ({ att: viewAtt, per: viewPer, emp: viewEmp })[tab](p); } catch (e) { p.innerHTML = `<span class="tag late">${esc(e.message)}</span>`; }
+}
+const dateBar = () => `<div class="row"><label>Date <input type="date" id="dsel" value="${date}"></label></div>`;
+const bindDate = () => $("#dsel").onchange = e => { if (e.target.value) { date = e.target.value; show(); } };
+
+async function viewAtt(p) {
+  const { rows } = await api("attendance?date=" + date);
+  p.innerHTML = dateBar() + (auth ? `<div class="row"><label class="btn alt">Upload attendance for ${dl(date)}<input type="file" id="up" accept=".xlsx,.xls,.csv" class="hide"></label>
+    <span class="mute">Columns: Store ID, Location, Employee Name, Global ID, Clock In Time. Re-uploading a date replaces it and keeps manual toggles.</span></div>` : "") +
+    (rows.length ? `<table><tr><th>Store</th><th>Location</th><th>Employee</th><th>Global ID</th><th>Clock in</th><th>Status</th>${auth ? "<th></th>" : ""}</tr>` +
+      rows.sort((a, b) => a.name.localeCompare(b.name)).map(r => `<tr><td>${esc(r.storeId)}</td><td>${esc(r.location)}</td><td>${esc(r.name)}</td><td>${esc(r.globalId)}</td><td>${t12(r.time)}</td>
+      <td><span class="tag ${r.late ? "late" : "ok"}">${r.late ? "Late" : "On time"}</span>${r.override !== null && r.override !== undefined ? ' <span class="mute">manual</span>' : ""}</td>
+      ${auth ? `<td><button class="btn alt" data-g="${esc(r.globalId)}" data-late="${!r.late}">Mark ${r.late ? "not late" : "late"}</button></td>` : ""}</tr>`).join("") + "</table>"
+      : '<p class="mute">No attendance uploaded for this date.</p>');
+  bindDate();
+  p.querySelectorAll("[data-g]").forEach(b => b.onclick = async () => {
+    try { await api("toggle", { date, globalId: b.dataset.g, late: b.dataset.late === "true" }); show(); } catch (e) { toast(e.message, true); }
+  });
+  const up = $("#up");
+  if (up) up.onchange = async () => {
+    try {
+      const out = (await readSheet(up.files[0])).map(r => ({ storeId: col(r, "store"), location: col(r, "location"), name: col(r, "employee", "name"), globalId: col(r, "global"), time: normTime(col(r, "clock")) })).filter(r => r.globalId && r.time);
+      if (!out.length) return toast("No valid rows found. Check the column names.", true);
+      if (!confirm(`Save ${out.length} rows for ${dl(date)}?`)) return;
+      const r = await api("upload", { date, rows: out });
+      toast(`Saved ${r.saved} employees`); show();
+    } catch (e) { toast(e.message, true); }
+  };
+}
+
+async function viewPer(p) {
+  const s = await api("summary?date=" + date);
+  p.innerHTML = dateBar() + `<p><strong>Pay period ${dl(s.start)} to ${dl(s.end)}</strong><br><span class="mute">3 or more lates in a pay period loses half of the month's commission.</span></p>` +
+    (s.rows.length ? `<table><tr><th>Employee</th><th>Lates</th><th>Details</th>${auth ? "<th>Warning email</th>" : ""}</tr>` + s.rows.map(r => `<tr>
+      <td>${esc(r.name)}<div class="mute">${esc(r.globalId)}</div></td>
+      <td><span class="tag ${r.count >= 3 ? "late" : r.count === 2 ? "warn" : "ok"}">${r.count}</span></td>
+      <td><details><summary>View lates</summary>${r.items.map(i => `<div>${dl(i.date)} · ${esc(i.location)} (Store ${esc(i.storeId)}) · ${t12(i.time)}</div>`).join("")}</details></td>
+      ${auth ? `<td>${r.count >= 2 ? (r.hasEmail ? `<button class="btn ${r.warned ? "alt" : ""}" data-send="${esc(r.globalId)}" data-name="${esc(r.name)}">${r.warned ? "Send again" : "Send warning"}</button>` : '<span class="mute">Add email first</span>') + (r.warned ? `<div class="mute">Last sent ${new Date(r.warned.at).toLocaleString()} (${r.warned.count} lates)</div>` : "") : '<span class="mute">Not yet</span>'}</td>` : ""}</tr>`).join("") + "</table>"
+      : '<p class="mute">No lates in this pay period.</p>');
+  bindDate();
+  p.querySelectorAll("[data-send]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Email a late warning to ${b.dataset.name}? It will be CC'd as configured.`)) return;
+    b.disabled = true;
+    try { const r = await api("send-warning", { date, globalId: b.dataset.send }); toast(`Warning sent to ${r.to}`); show(); } catch (e) { toast(e.message, true); b.disabled = false; }
+  });
+}
+
+async function viewEmp(p) {
+  if (!auth) { p.innerHTML = '<p class="mute">Backoffice login required.</p>'; return; }
+  const [list, st] = await Promise.all([api("employees"), api("settings")]);
+  empList = list;
+  p.innerHTML = `<div class="row"><button class="btn" id="save">Save emails</button><button class="btn alt" id="add">Add employee</button>
+    <label class="btn alt">Import from Excel<input type="file" id="imp" accept=".xlsx,.xls,.csv" class="hide"></label>
+    <span class="mute">Import columns: Global ID, Name, Email. Employees are added automatically when attendance is uploaded.</span></div>
+    <div id="etab"></div>
+    <h3 style="margin-top:26px">Warning email wording</h3>
+    <p class="mute">Sent from ${esc(st.from)}, CC ${esc(st.cc)}. Placeholders: {name} {count} {periodStart} {periodEnd} {lateList} {consequence}. {lateList} fills in the date, location and login time of every late so far.</p>
+    <label>Subject<input id="tsub" value="${esc(st.subject)}"></label>
+    <label>Message<textarea id="tbody" rows="10">${esc(st.body)}</textarea></label>
+    <div class="row" style="margin-top:12px"><button class="btn" id="tsave">Save wording</button></div>`;
+  drawEmp();
+  $("#add").onclick = () => { syncEmp(); empList.unshift({ globalId: "", name: "", email: "" }); drawEmp(); };
+  $("#save").onclick = async () => { syncEmp(); try { const r = await api("employees", { list: empList }); toast(`Saved ${r.saved} employees`); } catch (e) { toast(e.message, true); } };
+  $("#tsave").onclick = async () => { try { await api("settings", { subject: $("#tsub").value, body: $("#tbody").value }); toast("Wording saved"); } catch (e) { toast(e.message, true); } };
+  $("#imp").onchange = async () => {
+    try {
+      syncEmp();
+      const rows = await readSheet($("#imp").files[0]); let n = 0;
+      rows.forEach(r => {
+        const g = String(col(r, "global")).trim(), email = String(col(r, "email", "mail")).trim(); if (!g) return;
+        const e = empList.find(x => x.globalId === g);
+        if (e) { if (email) e.email = email; if (!e.name) e.name = col(r, "name"); } else empList.push({ globalId: g, name: col(r, "name"), email });
+        n++;
+      });
+      drawEmp(); toast(`Imported ${n} rows. Click Save emails to keep them.`);
+    } catch (e) { toast(e.message, true); }
+  };
+}
+function drawEmp() {
+  $("#etab").innerHTML = `<table><tr><th>Employee name</th><th>Global ID</th><th>Personal email</th></tr>` + empList.map(e =>
+    `<tr><td><input data-f="name" value="${esc(e.name)}"></td><td><input data-f="globalId" value="${esc(e.globalId)}"></td><td><input data-f="email" type="email" value="${esc(e.email)}" placeholder="name@gmail.com"></td></tr>`).join("") + "</table>";
+}
+function syncEmp() { document.querySelectorAll("#etab tr").forEach((tr, i) => { if (!i) return; tr.querySelectorAll("input").forEach(inp => empList[i - 1][inp.dataset.f] = inp.value); }); }
+
+setAuthUI(); show();
+</script>
+</body>
+</html>
