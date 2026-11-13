@@ -11,7 +11,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 header h1{font-size:18px;margin:0;font-weight:600;flex:1}
-main{max-width:1080px;margin:0 auto;padding:18px}
+main{width:100%;max-width:1900px;margin:0 auto;padding:18px clamp(12px,2vw,32px)}
 nav{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
 nav button{border:0;background:#dfe5ea;padding:9px 16px;border-radius:6px 6px 0 0;font:inherit;cursor:pointer;color:var(--mute)}
 nav button.on{background:var(--panel);color:var(--ink);font-weight:600}
@@ -24,6 +24,10 @@ button,input,textarea{font:inherit}
 input,textarea{border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
 input[type=date]{width:auto}
 table{border-collapse:collapse;width:100%}
+#etab table{table-layout:fixed}
+#etab input{min-width:0;font-size:14px;padding:7px 8px}
+#etab th:nth-child(1){width:18%}#etab th:nth-child(2){width:10%}#etab th:nth-child(3){width:19%}#etab th:nth-child(n+4){width:17.666%}
+td{word-break:break-word}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-weight:600;color:var(--mute);font-size:13px}
 .tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:13px;font-weight:600}
@@ -216,9 +220,9 @@ async function viewEmp(p) {
   };
 }
 function drawEmp() {
-  const ci = (e, k) => `<td><input data-f="${k}" type="email" style="min-width:190px" value="${esc(e[k])}" placeholder="optional"></td>`;
+  const ci = (e, k) => `<td><input data-f="${k}" type="email" value="${esc(e[k])}" placeholder="optional"></td>`;
   $("#etab").innerHTML = `<table><tr><th>Employee name</th><th>Global ID</th><th>Personal email</th><th>CC1</th><th>CC2</th><th>CC3</th></tr>` + empList.map(e =>
-    `<tr><td><input data-f="name" style="min-width:170px" value="${esc(e.name)}"></td><td><input data-f="globalId" style="min-width:100px" value="${esc(e.globalId)}"></td><td><input data-f="email" type="email" style="min-width:210px" value="${esc(e.email)}" placeholder="name@gmail.com"></td>${ci(e, "cc1")}${ci(e, "cc2")}${ci(e, "cc3")}</tr>`).join("") + "</table>";
+    `<tr><td><input data-f="name" value="${esc(e.name)}"></td><td><input data-f="globalId" value="${esc(e.globalId)}"></td><td><input data-f="email" type="email" value="${esc(e.email)}" placeholder="name@gmail.com"></td>${ci(e, "cc1")}${ci(e, "cc2")}${ci(e, "cc3")}</tr>`).join("") + "</table>";
 }
 function syncEmp() { document.querySelectorAll("#etab tr").forEach((tr, i) => { if (!i) return; tr.querySelectorAll("input").forEach(inp => empList[i - 1][inp.dataset.f] = inp.value); }); }
 
